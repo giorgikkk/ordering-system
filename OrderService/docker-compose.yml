@@ -11,7 +11,7 @@ services:
       - db
       - rabbitmq
     ports:
-      - 8083:8083
+      - 8082:8082
 
   db:
     image: postgres:latest
