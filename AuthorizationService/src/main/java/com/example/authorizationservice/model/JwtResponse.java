@@ -1,9 +1,9 @@
 package com.example.authorizationservice.model;
 
 public class JwtResponse {
-    private String token;
+    private final String token;
 
-    public JwtResponse(String token) {
+    public JwtResponse(final String token) {
         this.token = token;
     }
 

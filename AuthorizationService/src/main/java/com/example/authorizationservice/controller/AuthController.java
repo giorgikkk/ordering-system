@@ -4,8 +4,8 @@ import com.example.authorizationservice.model.JwtResponse;
 import com.example.authorizationservice.model.LoginRequest;
 import com.example.authorizationservice.model.User;
 import com.example.authorizationservice.model.enums.RoleType;
+import com.example.authorizationservice.security.JwtProvider;
 import com.example.authorizationservice.service.UserService;
-import com.example.authorizationservice.util.JwtProvider;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -28,13 +28,13 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-    private AuthenticationManager authenticationManager;
-    private UserService userService;
-    private PasswordEncoder passwordEncoder;
-    private JwtProvider jwtProvider;
+    private final AuthenticationManager authenticationManager;
+    private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtProvider jwtProvider;
 
     @Autowired
-    public AuthController(AuthenticationManager authenticationManager, UserService userService, PasswordEncoder passwordEncoder, JwtProvider jwtProvider) {
+    public AuthController(final AuthenticationManager authenticationManager, final UserService userService, final PasswordEncoder passwordEncoder, final JwtProvider jwtProvider) {
         this.authenticationManager = authenticationManager;
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
@@ -48,7 +48,7 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "Username or email already taken", content = {@Content(mediaType = "application/json")}),
             @ApiResponse(responseCode = "500", description = "Server error", content = {@Content(mediaType = "application/json")})
     })
-    public ResponseEntity<?> registerUser(@RequestBody User user) {
+    public ResponseEntity<?> registerUser(@RequestBody final User user) {
         if (userService.findByUsername(user.getUsername()).isPresent() ||
                 userService.findByEmail(user.getEmail()).isPresent()) {
             return ResponseEntity.badRequest().body("Username or email already taken.");
@@ -58,7 +58,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Sign up as a SELLER is not allowed.");
         }
 
-        User savedUser = userService.saveUser(user);
+        final User savedUser = userService.saveUser(user);
         return ResponseEntity.ok(savedUser);
     }
 
@@ -69,21 +69,23 @@ public class AuthController {
             @ApiResponse(responseCode = "401", description = "Invalid username or password", content = {@Content(mediaType = "application/json")}),
             @ApiResponse(responseCode = "500", description = "Server error", content = {@Content(mediaType = "application/json")})
     })
-    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> authenticateUser(@RequestBody final LoginRequest loginRequest) {
         try {
-            Authentication authentication = authenticationManager.authenticate(
+            final Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
             );
 
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            final UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
             if (passwordEncoder.matches(loginRequest.getPassword(), userDetails.getPassword())) {
-                String jwt = jwtProvider.generateToken(authentication);
+                final String jwt = jwtProvider.generateToken(authentication);
                 return ResponseEntity.ok(new JwtResponse(jwt));
             } else {
                 return ResponseEntity.badRequest().body("Invalid username or password.");
             }
-        } catch (AuthenticationException e) {
+        } catch (final AuthenticationException e) {
             return ResponseEntity.badRequest().body("Invalid username or password.");
         }
     }
@@ -96,25 +98,29 @@ public class AuthController {
             @ApiResponse(responseCode = "404", description = "User not found", content = {@Content(mediaType = "application/json")}),
             @ApiResponse(responseCode = "500", description = "Server error", content = {@Content(mediaType = "application/json")})
     })
-    public ResponseEntity<?> getUserDetails(@RequestParam(required = false) String username) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    public ResponseEntity<?> getUserDetails(@RequestParam(required = false) final String username) {
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
         }
 
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        final UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
         if (authentication.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ADMINISTRATOR")) && username != null) {
-            Optional<User> user = userService.findByUsername(username);
+                .anyMatch(auth -> auth.getAuthority().equals(RoleType.ADMINISTRATOR.name())) && username != null) {
+            final Optional<User> user = userService.findByUsername(username);
             if (user.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
             }
             return ResponseEntity.ok(user);
         }
 
-        Optional<User> user = userService.findByUsername(userDetails.getUsername());
+        if (username != null && !username.equals(userDetails.getUsername())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Clients can only view their own information");
+        }
+
+        final Optional<User> user = userService.findByUsername(userDetails.getUsername());
         if (user.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
@@ -130,32 +136,41 @@ public class AuthController {
             @ApiResponse(responseCode = "404", description = "User not found", content = {@Content(mediaType = "application/json")}),
             @ApiResponse(responseCode = "500", description = "Server error", content = {@Content(mediaType = "application/json")})
     })
-    public ResponseEntity<?> updateUserDetails(@RequestBody User userUpdate) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    public ResponseEntity<?> updateUserDetails(@RequestBody final User userUpdate) {
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
         }
 
-        String username = authentication.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ADMINISTRATOR")) && userUpdate.getUsername() != null
-                ? userUpdate.getUsername()
-                : authentication.getName();
+        final UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-        Optional<User> optionalUser = userService.findByUsername(username);
+        if (authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals(RoleType.ADMINISTRATOR.name())) && userUpdate.getUsername() != null) {
+            final Optional<User> optionalUser = userService.findByUsername(userUpdate.getUsername());
+            if (optionalUser.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            }
+            final User user = optionalUser.get();
+            user.setEmail(userUpdate.getEmail());
+            if (userUpdate.getRoles() != null) {
+                user.setRoles(userUpdate.getRoles());
+            }
+            userService.saveUser(user);
+            return ResponseEntity.ok("User updated successfully");
+        }
 
+        if (userUpdate.getUsername() != null && !userUpdate.getUsername().equals(userDetails.getUsername())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Clients can only update their own information");
+        }
+
+        final Optional<User> optionalUser = userService.findByUsername(userDetails.getUsername());
         if (optionalUser.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
 
-        User user = optionalUser.get();
+        final User user = optionalUser.get();
         user.setEmail(userUpdate.getEmail());
-
-        if (userUpdate.getRoles() != null && authentication.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ADMINISTRATOR"))) {
-            user.setRoles(userUpdate.getRoles());
-        }
-
         userService.saveUser(user);
         return ResponseEntity.ok("User updated successfully");
     }
@@ -168,16 +183,16 @@ public class AuthController {
             @ApiResponse(responseCode = "404", description = "User not found", content = {@Content(mediaType = "application/json")}),
             @ApiResponse(responseCode = "500", description = "Server error", content = {@Content(mediaType = "application/json")})
     })
-    public ResponseEntity<?> deleteUserAccount(@RequestParam(required = false) String username) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    public ResponseEntity<?> deleteUserAccount(@RequestParam(required = false) final String username) {
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
         }
 
         if (authentication.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ADMINISTRATOR")) && username != null) {
-            Optional<User> optionalUser = userService.findByUsername(username);
+                .anyMatch(auth -> auth.getAuthority().equals(RoleType.ADMINISTRATOR.name())) && username != null) {
+            final Optional<User> optionalUser = userService.findByUsername(username);
             if (optionalUser.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
             }
@@ -185,9 +200,12 @@ public class AuthController {
             return ResponseEntity.ok("User deleted successfully");
         }
 
-        String authenticatedUsername = authentication.getName();
-        Optional<User> optionalUser = userService.findByUsername(authenticatedUsername);
+        final UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        if (username != null && !username.equals(userDetails.getUsername())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Clients can only delete their own accounts");
+        }
 
+        final Optional<User> optionalUser = userService.findByUsername(userDetails.getUsername());
         if (optionalUser.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
@@ -204,11 +222,11 @@ public class AuthController {
             @ApiResponse(responseCode = "404", description = "User not found", content = {@Content(mediaType = "application/json")}),
             @ApiResponse(responseCode = "500", description = "Server error", content = {@Content(mediaType = "application/json")})
     })
-    public ResponseEntity<?> assignSellerRole(@PathVariable String username) {
+    public ResponseEntity<?> assignSellerRole(@PathVariable final String username) {
         try {
-            User updatedUser = userService.assignSellerRole(username);
+            final User updatedUser = userService.assignSellerRole(username);
             return ResponseEntity.ok(updatedUser);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

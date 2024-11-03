@@ -8,14 +8,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AuthService {
-    private RoleRepository roleRepository;
+    private final RoleRepository roleRepository;
 
     @Autowired
-    public AuthService(RoleRepository roleRepository) {
+    public AuthService(final RoleRepository roleRepository) {
         this.roleRepository = roleRepository;
     }
 
-    public Role findByName(RoleType name) {
+    public Role findByName(final RoleType name) {
         return roleRepository.findByName(name)
                 .orElseThrow(() -> new RuntimeException("Role not found: " + name));
     }

@@ -12,12 +12,12 @@ public class DataInitializer implements CommandLineRunner {
     private final RoleRepository roleRepository;
 
     @Autowired
-    public DataInitializer(RoleRepository roleRepository) {
+    public DataInitializer(final RoleRepository roleRepository) {
         this.roleRepository = roleRepository;
     }
 
     @Override
-    public void run(String... args) {
+    public void run(final String... args) {
         if (roleRepository.findByName(RoleType.ADMINISTRATOR).isEmpty()) {
             roleRepository.save(new Role(RoleType.ADMINISTRATOR));
         }

@@ -14,7 +14,7 @@ public class Role {
     public Role() {
     }
 
-    public Role(RoleType name) {
+    public Role(final RoleType name) {
         this.name = name;
     }
 
@@ -22,7 +22,7 @@ public class Role {
         return name;
     }
 
-    public void setName(RoleType name) {
+    public void setName(final RoleType name) {
         this.name = name;
     }
 }

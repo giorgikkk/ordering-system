@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -24,21 +23,21 @@ public class UserService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserRepository userRepository, AuthService authService, PasswordEncoder passwordEncoder) {
+    public UserService(final UserRepository userRepository, final AuthService authService, final PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.authService = authService;
         this.passwordEncoder = passwordEncoder;
     }
 
-    public User saveUser(User user) {
+    public User saveUser(final User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         if (user.getRoles() == null || user.getRoles().isEmpty()) {
-            Role defaultRole = authService.findByName(RoleType.CLIENT);
+            final Role defaultRole = authService.findByName(RoleType.CLIENT);
             user.setRoles(new HashSet<>(Set.of(defaultRole)));
         } else {
-            Set<Role> roles = new HashSet<>();
-            for (RoleType roleType : user.getRoles().stream().map(Role::getName).toList()) {
-                Role role = authService.findByName(roleType);
+            final Set<Role> roles = new HashSet<>();
+            for (final RoleType roleType : user.getRoles().stream().map(Role::getName).toList()) {
+                final Role role = authService.findByName(roleType);
                 roles.add(role);
             }
             user.setRoles(roles);
@@ -47,27 +46,23 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
-    public Optional<User> findByUsername(String username) {
+    public Optional<User> findByUsername(final String username) {
         return userRepository.findByUsername(username);
     }
 
-    public Optional<User> findByEmail(String email) {
+    public Optional<User> findByEmail(final String email) {
         return userRepository.findByEmail(email);
     }
 
-    public User updateUser(User user) {
-        return userRepository.save(user);
-    }
-
-    public void deleteUser(Long userId) {
+    public void deleteUser(final Long userId) {
         userRepository.deleteById(userId);
     }
 
-    public User assignSellerRole(String username) {
-        User user = userRepository.findByUsername(username)
+    public User assignSellerRole(final String username) {
+        final User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        Role sellerRole = authService.findByName(RoleType.SELLER);
+        final Role sellerRole = authService.findByName(RoleType.SELLER);
 
         if (user.getRoles().contains(sellerRole)) {
             throw new IllegalStateException("User already has seller role");
@@ -78,7 +73,7 @@ public class UserService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
         return new SecurityUser(userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username)));
     }
