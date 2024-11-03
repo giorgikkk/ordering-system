@@ -14,9 +14,9 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
-                .info(new Info().title("Your API Title")
+                .info(new Info().title("Authorization Service API")
                         .version("1.0")
-                        .description("Your API Description"))
+                        .description("API for managing authorizations"))
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
                 .components(new io.swagger.v3.oas.models.Components()
                         .addSecuritySchemes("bearerAuth", new SecurityScheme()
@@ -29,7 +29,7 @@ public class SwaggerConfig {
     public GroupedOpenApi publicApi() {
         return GroupedOpenApi.builder()
                 .group("public")
-                .pathsToMatch("/api/**")
+                .pathsToMatch("/api/auth/**")
                 .build();
     }
 }
