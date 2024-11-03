@@ -1,8 +1,8 @@
 package com.example.authorizationservice.controller;
 
-import com.example.authorizationservice.model.JwtResponse;
-import com.example.authorizationservice.model.LoginRequest;
 import com.example.authorizationservice.model.User;
+import com.example.authorizationservice.model.dto.JwtResponse;
+import com.example.authorizationservice.model.dto.LoginRequest;
 import com.example.authorizationservice.model.enums.RoleType;
 import com.example.authorizationservice.security.JwtProvider;
 import com.example.authorizationservice.service.UserService;

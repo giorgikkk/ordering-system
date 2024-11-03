@@ -1,4 +1,4 @@
-package com.example.authorizationservice.model;
+package com.example.authorizationservice.model.dto;
 
 public class JwtResponse {
     private final String token;

@@ -1,4 +1,4 @@
-package com.example.authorizationservice.model;
+package com.example.authorizationservice.model.dto;
 
 public class LoginRequest {
     private String username;
