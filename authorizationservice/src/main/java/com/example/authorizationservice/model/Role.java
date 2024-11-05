@@ -8,21 +8,21 @@ import jakarta.persistence.*;
 public class Role {
     @Id
     @Enumerated(EnumType.STRING)
-    @Column(unique = true, nullable = false)
-    private RoleType name;
+    @Column(name = "role_type", unique = true, nullable = false)
+    private RoleType role;
 
     public Role() {
     }
 
-    public Role(final RoleType name) {
-        this.name = name;
+    public Role(final RoleType role) {
+        this.role = role;
     }
 
-    public RoleType getName() {
-        return name;
+    public RoleType getRole() {
+        return role;
     }
 
-    public void setName(final RoleType name) {
-        this.name = name;
+    public void setRole(final RoleType role) {
+        this.role = role;
     }
 }

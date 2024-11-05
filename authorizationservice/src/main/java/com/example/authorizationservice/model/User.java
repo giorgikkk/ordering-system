@@ -1,6 +1,7 @@
 package com.example.authorizationservice.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
 import java.util.HashSet;
@@ -28,21 +29,27 @@ public class User {
     @Pattern(regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$", message = "Invalid email format")
     private String email;
 
+    @NotBlank
+    @Column(unique = true, nullable = false)
+    @Pattern(regexp = "^[0-9]{10}$", message = "Invalid phone number format")
+    private String phoneNumber;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
+            inverseJoinColumns = @JoinColumn(name = "role_type")
     )
     private Set<Role> roles = new HashSet<>();
 
     public User() {
     }
 
-    public User(final String username, final String password, final String email) {
+    public User(final String username, final String password, final String email, final String phoneNumber) {
         this.username = username;
         this.password = password;
         this.email = email;
+        this.phoneNumber = phoneNumber;
     }
 
     public Long getId() {
@@ -75,6 +82,14 @@ public class User {
 
     public void setEmail(final String email) {
         this.email = email;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(final String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
     public Set<Role> getRoles() {

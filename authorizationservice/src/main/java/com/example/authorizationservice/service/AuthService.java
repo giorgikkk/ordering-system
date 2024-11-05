@@ -15,8 +15,8 @@ public class AuthService {
         this.roleRepository = roleRepository;
     }
 
-    public Role findByName(final RoleType name) {
-        return roleRepository.findByName(name)
-                .orElseThrow(() -> new RuntimeException("Role not found: " + name));
+    public Role findByName(final RoleType role) {
+        return roleRepository.findByRole(role)
+                .orElseThrow(() -> new RuntimeException("Role not found: " + role));
     }
 }

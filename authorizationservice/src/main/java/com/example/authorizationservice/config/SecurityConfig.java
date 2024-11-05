@@ -25,6 +25,7 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/admin/**").hasAuthority(RoleType.ADMINISTRATOR.name())
+                        .requestMatchers("/users").hasAuthority(RoleType.ADMINISTRATOR.name())
                         .requestMatchers("/me").authenticated()
                         .anyRequest().authenticated())
                 .sessionManagement(sessionManagement -> sessionManagement

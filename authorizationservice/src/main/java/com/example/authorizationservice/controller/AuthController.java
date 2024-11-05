@@ -23,6 +23,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -54,7 +55,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Username or email already taken.");
         }
 
-        if (user.getRoles().stream().anyMatch(role -> role.getName() == RoleType.SELLER)) {
+        if (user.getRoles().stream().anyMatch(role -> role.getRole() == RoleType.SELLER)) {
             return ResponseEntity.badRequest().body("Sign up as a SELLER is not allowed.");
         }
 
@@ -88,6 +89,29 @@ public class AuthController {
         } catch (final AuthenticationException e) {
             return ResponseEntity.badRequest().body("Invalid username or password.");
         }
+    }
+
+    @PreAuthorize("hasRole('ADMINISTRATOR')")
+    @GetMapping("/users")
+    @Operation(summary = "Get all users")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Users retrieved successfully", content = {@Content(mediaType = "application/json")}),
+            @ApiResponse(responseCode = "500", description = "Server error", content = {@Content(mediaType = "application/json")})
+    })
+    public ResponseEntity<?> getAllUsers() {
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
+        }
+
+        if (authentication.getAuthorities().stream()
+                .noneMatch(auth -> auth.getAuthority().equals(RoleType.ADMINISTRATOR.name()))) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only administrators can view all users details");
+        }
+
+        List<User> allUsers = userService.getAllUsers();
+        return ResponseEntity.ok(allUsers);
     }
 
     @PreAuthorize("hasRole('ADMINISTRATOR') or authentication.principal.username == #username")

@@ -10,16 +10,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
     public static final String ORDER_QUEUE = "orderQueue";
-    public static final String NOTIFICATION_QUEUE = "notificationQueue";
 
     @Bean
     public Queue orderQueue() {
         return new Queue(ORDER_QUEUE, true);
-    }
-
-    @Bean
-    public Queue notificationQueue() {
-        return new Queue(NOTIFICATION_QUEUE, true);
     }
 
     @Bean

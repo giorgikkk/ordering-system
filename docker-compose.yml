@@ -43,3 +43,45 @@ services:
       - rabbitmq
     ports:
       - 8082:8082
+
+  notification-service:
+    container_name: notification-service
+    build: ./notificationservice
+    environment:
+      - spring.datasource.url=jdbc:postgresql://db:5432/postgres
+      - spring.datasource.username=spring
+      - spring.datasource.password=boot
+      - spring.datasource.driver-class-name=org.postgresql.Driver
+    depends_on:
+      - db
+      - rabbitmq
+    ports:
+      - 8083:8083
+
+  packaging-and-delivery-service:
+    container_name: packaging-and-delivery-service
+    build: ./packaginganddeliveryservice
+    environment:
+      - spring.datasource.url=jdbc:postgresql://db:5432/postgres
+      - spring.datasource.username=spring
+      - spring.datasource.password=boot
+      - spring.datasource.driver-class-name=org.postgresql.Driver
+    depends_on:
+      - db
+      - rabbitmq
+    ports:
+      - 8084:8084
+
+  products-service:
+    container_name: products-service
+    build: ./productsservice
+    environment:
+      - spring.datasource.url=jdbc:postgresql://db:5432/postgres
+      - spring.datasource.username=spring
+      - spring.datasource.password=boot
+      - spring.datasource.driver-class-name=org.postgresql.Driver
+    depends_on:
+      - db
+      - rabbitmq
+    ports:
+      - 8085:8085

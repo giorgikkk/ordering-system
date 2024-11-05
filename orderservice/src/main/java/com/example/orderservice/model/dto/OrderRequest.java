@@ -4,6 +4,8 @@ import java.util.List;
 
 public class OrderRequest {
     private String clientUsername;
+    private String clientPhoneNumber;
+
     private List<String> productIds;
     private List<Integer> quantities;
 
@@ -13,6 +15,14 @@ public class OrderRequest {
 
     public void setClientUsername(final String clientUsername) {
         this.clientUsername = clientUsername;
+    }
+
+    public String getClientPhoneNumber() {
+        return clientPhoneNumber;
+    }
+
+    public void setClientPhoneNumber(final String clientPhoneNumber) {
+        this.clientPhoneNumber = clientPhoneNumber;
     }
 
     public List<String> getProductIds() {

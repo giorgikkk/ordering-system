@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -36,7 +37,7 @@ public class UserService implements UserDetailsService {
             user.setRoles(new HashSet<>(Set.of(defaultRole)));
         } else {
             final Set<Role> roles = new HashSet<>();
-            for (final RoleType roleType : user.getRoles().stream().map(Role::getName).toList()) {
+            for (final RoleType roleType : user.getRoles().stream().map(Role::getRole).toList()) {
                 final Role role = authService.findByName(roleType);
                 roles.add(role);
             }
@@ -44,6 +45,14 @@ public class UserService implements UserDetailsService {
         }
 
         return userRepository.save(user);
+    }
+
+    public boolean isSeller(final User user) {
+        return user.getRoles().contains(authService.findByName(RoleType.SELLER));
+    }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
     }
 
     public Optional<User> findByUsername(final String username) {
