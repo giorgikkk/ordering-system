@@ -71,6 +71,7 @@ This service is responsible for managing product information.
 - **Java 17**
 - **Docker**
 - **PostgreSQL**
+- **RabbitMQ**
 
 ### Installation
 1. Clone the repository:
@@ -96,6 +97,7 @@ This service is responsible for managing product information.
 
 **Running Manually (without Docker):**
 - Start PostgreSQL and make sure it's connected.
+- Start RabbitMQ and make sure it's connected.
 - Start each service from its respective directory:
   ```bash
   cd authorizationservice
