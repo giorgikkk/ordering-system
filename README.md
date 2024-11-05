@@ -2,13 +2,13 @@
 
 ## Table of Contents
 1. [Project Overview](#project-overview)
-2[Services Description](#services-description)
+2. [Services Description](#services-description)
     - [Authorization/Authentication Service](#authorizationauthentication-service)
     - [Order Service](#order-service)
     - [Notification Service](#notification-service)
     - [Packaging and Delivery Service](#packaging-and-delivery-service)
     - [Products Service](#products-service)
-3.[Usage](#usage)
+3. [Usage](#usage)
 
 ## Project Overview
 The Ordering System is a microservices-based application designed to facilitate user authentication, order management, notifications, product handling, and packaging and delivery processes. The system comprises five main services: Authorization/Authentication Service, Order Service, Notification Service, Packaging and Delivery Service, and Products Service.
