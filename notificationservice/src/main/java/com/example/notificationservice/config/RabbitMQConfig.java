@@ -1,5 +1,8 @@
 package com.example.notificationservice.config;
 
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -9,11 +12,23 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitMQConfig {
-    public static final String ORDER_QUEUE = "orderQueue";
+    public static final String ORDER_QUEUE = "orderQueue1";
+    public static final String FANOUT_EXCHANGE = "orderFanoutExchange";
+
 
     @Bean
     public Queue orderQueue() {
         return new Queue(ORDER_QUEUE, true);
+    }
+
+    @Bean
+    public FanoutExchange fanoutExchange() {
+        return new FanoutExchange(FANOUT_EXCHANGE);
+    }
+
+    @Bean
+    public Binding bindingQueue(FanoutExchange fanoutExchange, Queue orderQueue) {
+        return BindingBuilder.bind(orderQueue).to(fanoutExchange);
     }
 
     @Bean

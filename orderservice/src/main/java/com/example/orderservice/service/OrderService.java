@@ -54,7 +54,7 @@ public class OrderService {
 
         Order order = createOrder(orderRequest, sellerIds);
 
-        rabbitTemplate.convertAndSend(RabbitMQConfig.ORDER_QUEUE, order);
+        rabbitTemplate.convertAndSend(RabbitMQConfig.FANOUT_EXCHANGE, "", order);
 
         return new OrderResponse(order.getId(), "Order placed successfully");
     }
