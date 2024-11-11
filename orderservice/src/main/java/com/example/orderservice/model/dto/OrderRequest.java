@@ -6,7 +6,7 @@ public class OrderRequest {
     private String clientUsername;
     private String clientPhoneNumber;
 
-    private List<String> productIds;
+    private List<Long> productIds;
     private List<Integer> quantities;
 
     public String getClientUsername() {
@@ -25,11 +25,11 @@ public class OrderRequest {
         this.clientPhoneNumber = clientPhoneNumber;
     }
 
-    public List<String> getProductIds() {
+    public List<Long> getProductIds() {
         return productIds;
     }
 
-    public void setProductIds(final List<String> productIds) {
+    public void setProductIds(final List<Long> productIds) {
         this.productIds = productIds;
     }
 

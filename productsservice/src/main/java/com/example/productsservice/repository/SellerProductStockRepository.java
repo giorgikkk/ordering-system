@@ -10,6 +10,6 @@ import java.util.Optional;
 
 @Repository
 public interface SellerProductStockRepository extends JpaRepository<SellerProductStock, Long> {
-    @Query("SELECT sps FROM SellerProductStock sps WHERE sps.product.id = :productId AND sps.seller.id = :sellerId")
+    @Query("SELECT sps FROM SellerProductStock sps WHERE sps.product.id = :productId AND sps.sellerId = :sellerId")
     Optional<SellerProductStock> findByProductAndSeller(@Param("productId") Long productId, @Param("sellerId") Long sellerId);
 }

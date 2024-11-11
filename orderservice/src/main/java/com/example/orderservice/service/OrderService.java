@@ -1,6 +1,5 @@
 package com.example.orderservice.service;
 
-import com.example.authorizationservice.model.User;
 import com.example.authorizationservice.service.UserService;
 import com.example.orderservice.client.AuthServiceClient;
 import com.example.orderservice.config.RabbitMQConfig;
@@ -48,12 +47,12 @@ public class OrderService {
     public OrderResponse placeOrder(final OrderRequest orderRequest, final String token) {
         verifyClientRole(orderRequest, token);
 
-        List<String> productIds = orderRequest.getProductIds();
+        List<Long> productIds = orderRequest.getProductIds();
         List<Integer> quantities = orderRequest.getQuantities();
 
-        List<User> sellers = validateProductsAndFindSellers(productIds, quantities);
+        List<Long> sellerIds = validateProductsAndFindSellers(productIds, quantities);
 
-        Order order = createOrder(orderRequest, sellers);
+        Order order = createOrder(orderRequest, sellerIds);
 
         rabbitTemplate.convertAndSend(RabbitMQConfig.ORDER_QUEUE, order);
 
@@ -77,29 +76,29 @@ public class OrderService {
     }
 
 
-    private List<User> validateProductsAndFindSellers(final List<String> productIds, final List<Integer> quantities) {
-        List<User> sellers = new ArrayList<>();
+    private List<Long> validateProductsAndFindSellers(final List<Long> productIds, final List<Integer> quantities) {
+        List<Long> sellerIds = new ArrayList<>();
 
         for (int i = 0; i < productIds.size(); i++) {
-            long requestedProductId = Long.parseLong(productIds.get(i));
+            long requestedProductId = productIds.get(i);
             int requestedProductQuantity = quantities.get(i);
 
             Product product = productService.getProductById(requestedProductId);
             if (product == null) {
-                sellers.add(null);
+                sellerIds.add(null);
                 continue;
             }
 
-            Set<User> productSellers = product.getSellers();
+            Set<Long> productSellerIds = product.getSellerIds();
             boolean sellerFound = false;
 
-            for (final User seller : productSellers) {
-                if (userService.isSeller(seller)) {
-                    Optional<SellerProductStock> stockOptional = sellerProductStockService.getStockbySellerAndProduct(requestedProductId, seller.getId());
+            for (final Long sellerId : productSellerIds) {
+                if (userService.isSeller(sellerId)) {
+                    Optional<SellerProductStock> stockOptional = sellerProductStockService.getStockbySellerAndProduct(requestedProductId, sellerId);
                     if (stockOptional.isPresent()) {
                         SellerProductStock stock = stockOptional.get();
                         if (stock.getQuantity() >= requestedProductQuantity) {
-                            sellers.add(seller);
+                            sellerIds.add(sellerId);
                             sellerFound = true;
                             break;
                         }
@@ -111,11 +110,11 @@ public class OrderService {
                 throw new RuntimeException("No valid seller with sufficient stock for product: " + product.getName() + ", requested quantity: " + requestedProductQuantity);
             }
         }
-        return sellers;
+        return sellerIds;
     }
 
-    private Order createOrder(final OrderRequest orderRequest, final List<User> sellers) {
-        List<String> sellersEmails = sellers.stream().map(User::getEmail).toList();
+    private Order createOrder(final OrderRequest orderRequest, final List<Long> sellerIds) {
+        List<String> sellersEmails = sellerIds.stream().map(userService::getEmail).toList();
 
         final Order order = new Order();
         order.setClientUsername(orderRequest.getClientUsername());

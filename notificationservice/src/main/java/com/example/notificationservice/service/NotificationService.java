@@ -47,7 +47,7 @@ public class NotificationService {
         Map<String, List<String>> clientEmailAdProductsInfo = new HashMap<>();
 
         List<String> sellerEmails = order.getSellersEmails();
-        List<String> productIds = order.getProductIds();
+        List<Long> productIds = order.getProductIds();
         List<Integer> quantities = order.getQuantities();
 
         for (int i = 0; i < sellerEmails.size(); i++) {
@@ -55,7 +55,7 @@ public class NotificationService {
             if (sellerEmail == null) {
                 continue;
             }
-            String sellerProductId = productIds.get(i);
+            Long sellerProductId = productIds.get(i);
             int productQuantity = quantities.get(i);
 
             final String productInfo = "Product ID: " + sellerProductId +
@@ -89,11 +89,11 @@ public class NotificationService {
 
     private double calculateTotalPrice(final OrderDTO order) {
         double totalPrice = 0.0;
-        List<String> productIds = order.getProductIds();
+        List<Long> productIds = order.getProductIds();
         List<Integer> quantities = order.getQuantities();
 
         for (int i = 0; i < productIds.size(); i++) {
-            Product product = productService.getProductById(Long.parseLong(productIds.get(i)));
+            Product product = productService.getProductById(productIds.get(i));
             if (product != null) {
                 totalPrice += product.getPrice() * quantities.get(i);
             }

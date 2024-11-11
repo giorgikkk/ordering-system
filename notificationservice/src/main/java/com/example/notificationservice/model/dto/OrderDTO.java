@@ -24,7 +24,7 @@ public class OrderDTO {
 
     @NotEmpty(message = "Product IDs cannot be empty.")
     @JsonProperty("product_ids")
-    private List<String> productIds;
+    private List<Long> productIds;
 
     @NotEmpty(message = "Quantities cannot be empty.")
     @JsonProperty("quantities")
@@ -34,7 +34,7 @@ public class OrderDTO {
                     @JsonProperty("client_username") String clientUsername,
                     @JsonProperty("client_phone_number") String clientPhoneNumber,
                     @JsonProperty("seller_emails") List<String> sellerEmails,
-                    @JsonProperty("product_ids") List<String> productIds,
+                    @JsonProperty("product_ids") List<Long> productIds,
                     @JsonProperty("quantities") List<Integer> quantities) {
         this.id = id;
         this.clientUsername = clientUsername;
@@ -76,11 +76,11 @@ public class OrderDTO {
         this.sellersEmails = sellersEmails;
     }
 
-    public List<String> getProductIds() {
+    public List<Long> getProductIds() {
         return productIds;
     }
 
-    public void setProductIds(List<String> productIds) {
+    public void setProductIds(List<Long> productIds) {
         this.productIds = productIds;
     }
 

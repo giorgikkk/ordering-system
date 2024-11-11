@@ -34,7 +34,7 @@ public class Order {
     @ElementCollection
     @NotEmpty(message = "Product IDs cannot be empty.")
     @Column(name = "product_ids", nullable = false)
-    private List<String> productIds;
+    private List<Long> productIds;
 
     @ElementCollection
     @NotEmpty(message = "Quantities cannot be empty.")
@@ -58,7 +58,7 @@ public class Order {
                  final String clientUsername,
                  final String clientPhoneNumber,
                  final List<String> sellersEmails,
-                 final List<String> productIds,
+                 final List<Long> productIds,
                  final List<Integer> quantities,
                  final LocalDateTime orderDate,
                  final OrderStatusType status) {
@@ -104,11 +104,11 @@ public class Order {
         this.sellersEmails = sellersEmails;
     }
 
-    public List<String> getProductIds() {
+    public List<Long> getProductIds() {
         return productIds;
     }
 
-    public void setProductIds(final List<String> productIds) {
+    public void setProductIds(final List<Long> productIds) {
         this.productIds = productIds;
     }
 

@@ -47,12 +47,21 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
-    public boolean isSeller(final User user) {
-        return user.getRoles().contains(authService.findByName(RoleType.SELLER));
+    public boolean isSeller(final Long userId) {
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty()) {
+            throw new RuntimeException("User not found with id " + userId);
+        }
+
+        return user.get().getRoles().contains(authService.findByName(RoleType.SELLER));
     }
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
+    }
+
+    public User findById(final Long id) {
+        return userRepository.findById(id).orElse(null);
     }
 
     public Optional<User> findByUsername(final String username) {
@@ -61,6 +70,16 @@ public class UserService implements UserDetailsService {
 
     public Optional<User> findByEmail(final String email) {
         return userRepository.findByEmail(email);
+    }
+
+    public String getEmail(final Long userId) {
+        Optional<User> user = userRepository.findById(userId);
+
+        if (user.isEmpty()) {
+            throw new RuntimeException("User not found with id " + userId);
+        }
+
+        return user.get().getEmail();
     }
 
     public void deleteUser(final Long userId) {

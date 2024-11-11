@@ -1,9 +1,9 @@
 package com.example.productsservice.model;
 
-import com.example.authorizationservice.model.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -29,13 +29,10 @@ public class Product {
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "product_sellers",
-            joinColumns = @JoinColumn(name = "product_id"),
-            inverseJoinColumns = @JoinColumn(name = "seller_id")
-    )
-    private Set<User> sellers = new HashSet<>();
+    @ElementCollection
+    @NotEmpty(message = "Seller IDs cannot be empty.")
+    @Column(name = "seller_ids", nullable = false)
+    private Set<Long> sellerIds = new HashSet<>();
 
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
@@ -73,12 +70,12 @@ public class Product {
         this.quantity = quantity;
     }
 
-    public Set<User> getSellers() {
-        return sellers;
+    public Set<Long> getSellerIds() {
+        return sellerIds;
     }
 
-    public void setSellers(final Set<User> sellers) {
-        this.sellers = sellers;
+    public void setSellerIds(final Set<Long> sellerIds) {
+        this.sellerIds = sellerIds;
     }
 
     public Category getCategory() {

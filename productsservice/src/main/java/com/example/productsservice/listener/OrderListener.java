@@ -21,15 +21,14 @@ public class OrderListener {
 
     @RabbitListener(queues = RabbitMQConfig.ORDER_QUEUE)
     public void receiveOrder(OrderDTO order) {
-        List<String> productIds = order.getProductIds();
+        List<Long> productIds = order.getProductIds();
         List<Integer> quantities = order.getQuantities();
 
         for (int i = 0; i < productIds.size(); i++) {
-            String productId = productIds.get(i);
+            Long productId = productIds.get(i);
             int quantityToReduce = quantities.get(i);
-            Long id = Long.parseLong(productId);
 
-            Product product = productRepository.findById(id)
+            Product product = productRepository.findById(productId)
                     .orElseThrow(() -> new RuntimeException("Product not found: " + productId));
 
             if (product.getQuantity() >= quantityToReduce) {
