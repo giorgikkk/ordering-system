@@ -13,9 +13,9 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
-                .info(new Info().title("Order Service API")
+                .info(new Info().title("Products Service API")
                         .version("1.0")
-                        .description("API for managing orders"))
+                        .description("API for managing products"))
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
                 .components(new io.swagger.v3.oas.models.Components()
                         .addSecuritySchemes("bearerAuth", new SecurityScheme()
